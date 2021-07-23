@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -42,6 +42,25 @@ def posts():
 
     all_posts = Post.query.order_by(Post.created_at).all()
     return render_template('posts.html', posts=all_posts)
+
+# Edit
+@app.route('/post/edit/<int:id>', methods=['GET', 'POST'])
+def editPost(id):
+    post = Post.query.get_or_404(id)
+    if request.method == 'POST':
+        post.title = request.form['title']
+        post.content = request.form['content']
+        db.session.commit()
+        return redirect('/posts')
+    return jsonify({"title" : post.title, "content": post.content})
+
+# Delete
+@app.route('/post/delete/<int:id>')
+def deletePost(id):
+    post = Post.query.get_or_404(id)
+    db.session.delete(post)
+    db.session.commit()
+    return redirect('/posts')
 
 @app.route('/home/<string:name>')
 def home(name):
